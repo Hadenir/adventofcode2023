@@ -7,7 +7,7 @@ fn main() {
 
     println!("Part 1: {}", solve_part_1(&contents));
 
-    println!("Part 2: {}", solve_part_2(&contents));
+    // println!("Part 2: {}", solve_part_2(&contents));
 }
 
 #[cfg(test)]
