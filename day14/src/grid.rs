@@ -1,4 +1,6 @@
-#[derive(Debug, Clone, Default)]
+use std::iter::FusedIterator;
+
+#[derive(Debug, Clone, Default, Hash)]
 pub struct Grid<T> {
     pub width: usize,
     pub height: usize,
@@ -39,6 +41,7 @@ pub struct IterIndices {
     back_x: usize,
     back_y: usize,
     width: usize,
+    finished: bool,
 }
 
 impl IterIndices {
@@ -49,6 +52,7 @@ impl IterIndices {
             back_x: grid.width - 1,
             back_y: grid.height - 1,
             width: grid.width,
+            finished: false,
         }
     }
 }
@@ -57,8 +61,15 @@ impl Iterator for IterIndices {
     type Item = (usize, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.y >= self.back_y && self.x > self.back_x {
+        if self.finished {
             return None;
+        }
+
+        let pair = (self.x, self.y);
+
+        if self.y == self.back_y && self.x == self.back_x {
+            self.finished = true;
+            return Some(pair);
         }
 
         let pair = (self.x, self.y);
@@ -74,19 +85,29 @@ impl Iterator for IterIndices {
 
 impl DoubleEndedIterator for IterIndices {
     fn next_back(&mut self) -> Option<Self::Item> {
-        if self.y >= self.back_y && self.x > self.back_x {
+        if self.finished {
             return None;
         }
 
         let pair = (self.back_x, self.back_y);
+
+        if self.y == self.back_y && self.x == self.back_x {
+            self.finished = true;
+            return Some(pair);
+        }
+
         if self.back_x == 0 {
             self.back_x = self.width - 1;
             self.back_y -= 1;
+        } else {
+            self.back_x -= 1;
         }
 
         Some(pair)
     }
 }
+
+impl FusedIterator for IterIndices {}
 
 
 #[cfg(test)]
